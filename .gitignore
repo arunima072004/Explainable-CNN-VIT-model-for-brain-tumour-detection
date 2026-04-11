@@ -1,0 +1,26 @@
+# Model weights (too large for GitHub — download separately)
+backend/*.pth
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+backend/.demo_mode
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Loose test images and reports in root
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.pdf
