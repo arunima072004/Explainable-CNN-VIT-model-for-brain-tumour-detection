@@ -92,12 +92,12 @@ class CNNTumorClassifier(nn.Module):
 def load_models(vit_weights_path: str, cnn_weights_path: str, device: torch.device):
     """Load both models from saved weight files."""
     vit_model = ViTBinaryClassifier(pretrained=False)
-    vit_model.load_state_dict(torch.load(vit_weights_path, map_location=device))
+    vit_model.load_state_dict(torch.load(vit_weights_path, map_location=device, weights_only=False))
     vit_model.to(device)
     vit_model.eval()
 
     cnn_model = CNNTumorClassifier(num_classes=3, pretrained=False)
-    cnn_model.load_state_dict(torch.load(cnn_weights_path, map_location=device))
+    cnn_model.load_state_dict(torch.load(cnn_weights_path, map_location=device, weights_only=False))
     cnn_model.to(device)
     cnn_model.eval()
 

@@ -27,7 +27,9 @@ vit_model, cnn_model = None, None
 def get_models():
     global vit_model, cnn_model
     if vit_model is None or cnn_model is None:
-        if not os.path.exists(VIT_WEIGHTS) or not os.path.exists(CNN_WEIGHTS):
+        vit_exists = os.path.exists(VIT_WEIGHTS) or os.path.isdir(VIT_WEIGHTS)
+        cnn_exists = os.path.exists(CNN_WEIGHTS) or os.path.isdir(CNN_WEIGHTS)
+        if not vit_exists or not cnn_exists:
             print("[WARN] Weight files not found — initializing with random weights for demo.")
             _save_dummy_weights()
         vit_model, cnn_model = load_models(VIT_WEIGHTS, CNN_WEIGHTS, device)
@@ -38,11 +40,11 @@ def get_models():
 def _save_dummy_weights():
     """Save randomly-initialized model weights so the pipeline runs without trained files."""
     from model import ViTBinaryClassifier, CNNTumorClassifier
-    if not os.path.exists(VIT_WEIGHTS):
+    if not os.path.exists(VIT_WEIGHTS) and not os.path.isdir(VIT_WEIGHTS):
         m = ViTBinaryClassifier(pretrained=False)
         torch.save(m.state_dict(), VIT_WEIGHTS)
         print(f"[INFO] Saved dummy ViT weights → {VIT_WEIGHTS}")
-    if not os.path.exists(CNN_WEIGHTS):
+    if not os.path.exists(CNN_WEIGHTS) and not os.path.isdir(CNN_WEIGHTS):
         m = CNNTumorClassifier(num_classes=3, pretrained=False)
         torch.save(m.state_dict(), CNN_WEIGHTS)
         print(f"[INFO] Saved dummy CNN weights → {CNN_WEIGHTS}")

@@ -1,5 +1,7 @@
-# Model weights (too large for GitHub — download separately)
-backend/*.pth
+# Model weights — tracked via Git LFS
+# backend/*.pth files (single-file format)
+# backend/vit_binary_best/ and backend/cnn_tumor_type_best/ (zipfile folder format)
+# These are NOT ignored — Git LFS handles the large file upload
 
 # Python
 __pycache__/
