@@ -34,10 +34,17 @@ class ViTBinaryClassifier(nn.Module):
 
     def _register_hooks(self):
         def hook_fn(module, input, output):
+            # timm ViT attention module stores raw attention weights in .attn_drop
+            # We capture the softmax attention matrix before dropout
             self.attention_weights = output
 
         if hasattr(self.vit, 'blocks'):
-            self.vit.blocks[-1].attn.register_forward_hook(hook_fn)
+            # Hook into the softmax attention weights via attn_drop
+            last_block = self.vit.blocks[-1]
+            if hasattr(last_block.attn, 'attn_drop'):
+                last_block.attn.attn_drop.register_forward_hook(hook_fn)
+            else:
+                last_block.attn.register_forward_hook(hook_fn)
 
     def forward(self, x):
         features = self.vit(x)
@@ -52,8 +59,16 @@ class ViTBinaryClassifier(nn.Module):
             if self.attention_weights is None:
                 return None
 
-            # Shape: [Batch, Tokens, Features] → remove CLS token, avg over features
-            attn_map = self.attention_weights[:, 1:, :].mean(dim=-1)
+            attn = self.attention_weights
+
+            # Shape from attn_drop: [B, heads, N, N]
+            if attn.dim() == 4:
+                # Average over heads, take CLS token's attention to all patches
+                # attn[:, :, 0, 1:] = CLS attending to each patch, averaged over heads
+                attn_map = attn[:, :, 0, 1:].mean(dim=1)  # [B, num_patches]
+            else:
+                # Fallback: [B, N, C] projected output — average over features
+                attn_map = attn[:, 1:, :].mean(dim=-1)  # [B, num_patches]
 
             patch_size = 16
             grid_size = VIT_IMG_SIZE // patch_size  # 14

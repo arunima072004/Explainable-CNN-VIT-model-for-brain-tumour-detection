@@ -72,7 +72,7 @@ def detect_tumor(image_rgb: np.ndarray, vit_model, device) -> dict:
         pred   = output.argmax(dim=1).item()
 
     confidence = probs[0, 1].item()
-    has_tumor  = confidence > 0.3   # lowered threshold — model is biased toward no_tumor
+    has_tumor  = confidence >= 0.45  # slightly below 0.5 to account for model's confidence calibration
 
     # Get attention map for localisation (same hook as notebook)
     attn_map = vit_model.get_attention_map(tensor)
